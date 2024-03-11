@@ -41,9 +41,8 @@ fn test_owner_ship_borrow() {
 
 #[test]
 fn test_mut_borrow() {
-    // 加上 mut 使变量可变，后面在函数内部进行了变化
     let mut a = String::from("hello");
-    // 用 a 的引用作为参数传递给函数，而不是把所有权传给函数
+    // 借用时需要借用 &mut a (可变引用)，才可改变值
     change(&mut a);
     assert_eq!(a, "hello, world");
 }
