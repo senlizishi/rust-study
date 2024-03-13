@@ -34,7 +34,7 @@ fn test_owner_ship_borrow() {
     let a = String::from("hello");
     // 借(borrow)的方式,创建了一个指向 a 的引用，当引用离开作用域后，其指向的值也不会被丢弃
     let b = &a;
-    // 通过 * 解引用 
+    // 通过 * 解引用，这里写 b 也行，因为 assert_eq 会自动解引用
     assert_eq!(*b, "hello");
 }
 
@@ -50,4 +50,24 @@ fn test_mut_borrow() {
 fn change(some_string: &mut String){
     // 函数没有返回值，那么返回一个 ()
     some_string.push_str(", world")
+}
+
+#[test]
+fn test_lifecycle() {
+    let string1 = String::from("long string is long");
+
+    {
+        let string2 = String::from("xyz");
+        let result = longest(string1.as_str(), string2.as_str());
+        println!("The longest string is {}", result);
+    }
+}
+
+// 使用 'a 进行生命周期标注，告诉编译器返回的引用生命周期与 x 和 y 中最小的相等
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() {
+        x
+    } else {
+        y
+    }
 }
