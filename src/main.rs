@@ -63,11 +63,44 @@ fn test_lifecycle() {
     }
 }
 
-// 使用 'a 进行生命周期标注，告诉编译器返回的引用生命周期与 x 和 y 中最小的相等
+// 使用 'a 进行生命周期标注，告诉编译器返回的引用生命周期是 x 和 y 作用域的重合部分，也就是 x 和 y 中生命周期最小的那部分
+// 标记的生命周期只是为了提供信息给编译器，这样编译器就拥有充分的信息来确保我们的操作是内存安全的
 fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
     if x.len() > y.len() {
         x
     } else {
         y
     }
+}
+
+// Rust 的对象定义和方法定义是分离的
+#[derive(Debug)]
+struct User {
+    active: bool,
+    username: String,
+    sign_in_count: u64,
+}
+impl User {
+    // 构造器函数（没有 self 的函数被称之为关联函数，因为是函数，所以不能用 . 的方式来调用，我们需要用 :: 来调用）
+    pub fn new(active: bool, username: String,sign_in_count: u64) -> Self {
+        User { active, username,sign_in_count }
+    }
+    pub fn sign_in_count(&self) -> u64 {
+        self.sign_in_count
+    }
+}
+
+#[test]
+fn test_struct() {
+    // let mut user1 = User {
+    //     username: String::from("test"),
+    //     active: true,
+    //     sign_in_count: 1,
+    // };
+    // 采用构造函数创建对象
+    let user1 = User::new(true, String::from("test"),1);
+    println!("整体信息打印：{:?}", user1); // 使用 #[derive(Debug)] 对结构体进行了标记，这样才能使用 println!("{:?}", s); 的方式对其进行打印输出
+    println!("用户名为： {}", user1.username);
+    print!("值为：{}",user1.sign_in_count())
+
 }
