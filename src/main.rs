@@ -1,3 +1,7 @@
+
+mod math; // 引入了 math 模块
+pub use math::arithmetic;
+
 fn main() {
     println!("Hello, world!");
 }
@@ -103,4 +107,16 @@ fn test_struct() {
     println!("用户名为： {}", user1.username);
     print!("值为：{}",user1.sign_in_count())
 
+}
+
+#[test]
+fn test_module() {
+    
+    // 可以用 use 简化路径
+    let result = arithmetic::add(5, 10);
+    println!("The sum is: {}", result);
+
+    // 使用绝对路径调用方法
+    let square_area = math::geometry::area_of_square(4.0);
+    println!("The area of a square with side length 4 is: {}", square_area);
 }
