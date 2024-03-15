@@ -3,9 +3,8 @@ use std::process;
 use rust_study::Config;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
     // unwrap_or_else中如果 Result 是 OK 则返回 Ok 的值，否则返回 Err 的值
-    let config = Config::build(&args).unwrap_or_else(|err| {
+    let config = Config::build(env::args()).unwrap_or_else(|err| {
         println!("Problem parsing arguments: {err}");
         // 终结进程
         process::exit(1);

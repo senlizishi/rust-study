@@ -8,13 +8,20 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn build(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("not enough arguments");
-        }
+    pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
+        // 第一个参数是程序名，由于无需使用，因此这里直接空调用一次
+        args.next();
 
-        let query = args[1].clone();
-        let file_path = args[2].clone();
+        // 使用模式匹配
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string"),
+        };
+
+        let file_path = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a file path"),
+        };
         
         // 使用 Result 来返回
         Ok(Config { query, file_path })
@@ -26,13 +33,18 @@ impl Config {
 pub fn run(config: Config) -> Result<(), Box<dyn Error>>{
     // 如果结果是 Ok(T)，则把 T 赋值给 f，如果结果是 Err(E)，则返回该错误，所以 ? 特别适合用来传播错误
     let contents = fs::read_to_string(config.file_path)?;
-    // 逐行遍历
-    for line in contents.lines() {
-        if line.contains(&config.query) {
-            println!("{line}");
-        }
+   
+    for line in search(&config.query, &contents) {
+        println!("{line}");
     }
     Ok(())
+}
+
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
 }
 
 
