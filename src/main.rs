@@ -1,8 +1,22 @@
 mod math;
+use std::env;
+use std::process;
 
 fn main() {
-    println!("Hello, world!");
+    let args: Vec<String> = env::args().collect();
+    // unwrap_or_else中如果 Result 是 OK 则返回 Ok 的值，否则返回 Err 的值
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        // 终结进程
+        process::exit(1);
+    });
+
+    println!("Searching for {}", config.query);
+    println!("In file {}", config.file_path);
+
+    run(config);
 }
+
 
 
 #[cfg(test)]
