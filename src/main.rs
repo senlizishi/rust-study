@@ -1,6 +1,7 @@
 mod math;
 use std::env;
 use std::process;
+use rust_study::Config;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -14,10 +15,12 @@ fn main() {
     println!("Searching for {}", config.query);
     println!("In file {}", config.file_path);
 
-    run(config);
+    // 我们并不关注 run 返回的 Ok 值，因此只需要用 if let 去匹配是否存在错误即可
+    if let Err(e) = rust_study::run(config) {
+        println!("Application error: {e}");
+        process::exit(1);
+    }
 }
-
-
 
 #[cfg(test)]
 mod tests {
