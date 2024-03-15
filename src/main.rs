@@ -114,7 +114,6 @@ mod tests {
             self.sign_in_count
         }
     }
-
     #[test]
     fn test_struct() {
         // let mut user1 = User {
@@ -127,7 +126,23 @@ mod tests {
         println!("整体信息打印：{:?}", user1); // 使用 #[derive(Debug)] 对结构体进行了标记，这样才能使用 println!("{:?}", s); 的方式对其进行打印输出
         println!("用户名为： {}", user1.username);
         print!("值为：{}",user1.sign_in_count())
+    }
 
+    pub trait Summary {
+        fn summarize(&self) -> String;
+    }
+    pub struct Post {
+        pub author: String
+    }
+    impl Summary for Post {
+        fn summarize(&self) -> String {
+            format!("作者是{}", self.author)
+        }
+    }
+    #[test]
+    fn test_trait() {
+        let post = Post{author: "Sunface".to_string()};
+        println!("{}",post.summarize());
     }
 
     #[test]
