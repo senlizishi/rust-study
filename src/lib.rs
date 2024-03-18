@@ -183,7 +183,7 @@ mod tests {
 
 
     #[test]
-    fn closure() {
+    fn test_closure() {
         let x = 1;
         // 函数式编程：闭包是一种匿名函数,它可以赋值给变量也可以作为参数传递给其它函数，不同于函数的是，它允许捕获调用者作用域中的值
         let sum = |y| x + y;
@@ -194,5 +194,16 @@ mod tests {
             x
         };
         assert_eq!(1, print_x());
+    }
+
+    #[test]
+    fn test_smart_pointer() {
+        // 通过 Box<T> 来创建一个智能指针，Box<T> 是指针，它指向了堆上的数据
+        let a = Box::new(3);
+        // 隐式地调用了 Deref 对智能指针 a 进行了解引用
+        println!("a = {}", a);
+        // 需要手动解引用
+        let b = *a + 1;
+        // a 持有的智能指针将在作用域结束（main 函数结束）时，被释放掉，这是因为 Box<T> 实现了 Drop 特征
     }
 }
