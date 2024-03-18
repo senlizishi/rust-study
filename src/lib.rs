@@ -180,4 +180,19 @@ mod tests {
         let square_area = geometry::area_of_square(4.0);
         println!("The area of a square with side length 4 is: {}", square_area);
     }
+
+
+    #[test]
+    fn closure() {
+        let x = 1;
+        // 函数式编程：闭包是一种匿名函数,它可以赋值给变量也可以作为参数传递给其它函数，不同于函数的是，它允许捕获调用者作用域中的值
+        let sum = |y| x + y;
+        assert_eq!(3, sum(2));
+        // 无参且有方法体写法
+        let print_x = || {
+            println!("muuuu.....");
+            x
+        };
+        assert_eq!(1, print_x());
+    }
 }
