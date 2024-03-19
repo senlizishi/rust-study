@@ -65,43 +65,45 @@ mod tests {
     */ 
     #[test]
     fn test_string() {
-        // 表示字符串字面量，字符串字面量是在编译时就已经知道的固定内容，它们存储在程序的只读数据段（read-only data section），而非堆上
+        // 右侧是字符串字面量，左侧 a 实际上是 &'static str 类型的值，即指向静态存储区的不可变字符串引用
         let a= "hello";
-        // 创建的 String 类型存储在堆上，是动态可变的
-        let b = a.to_string();
+
+        // String::from 方法接收一个字符串字面量，并基于这个字面量创建一个新的、可变的 String 实例。该 String 存储在堆中
+        let b = String::from("hello"); 
         assert_eq!(b, "hello");
+
+        // 所有权转移（move），当值的所有权从 b 转移（move）到 c 后。Rust 会认为 b 不再有效 （注意：如果是字面量则只是拷贝，不会失效）
+        let c = b;
+        // 借用
+        let d = &c;
+        assert_eq!(d, "hello"); // 通过 * 解引用，这里写 b 也行，因为 assert_eq 会自动解引用
+
+        // &mut 可变引用,可改变值
+        let mut e = String::from("hello");
+        change(&mut e);
+        assert_eq!(e, "hello, world");
     }
-
-
-    #[test]
-    fn test_owner_ship_move() {
-        let a = String::from("hello");
-        // 当值的所有权从 a 转移（move）到 b 后。Rust 会认为 a 不再有效 （注意：如果是字面量则只是拷贝，不会失效）
-        let b = a;
-        assert_eq!(b, "hello");
-    }
-
-    #[test]
-    fn test_owner_ship_borrow() {
-        let a = String::from("hello");
-        // 借(borrow)的方式,创建了一个指向 a 的引用，当引用离开作用域后，其指向的值也不会被丢弃
-        let b = &a;
-        // 通过 * 解引用，这里写 b 也行，因为 assert_eq 会自动解引用
-        assert_eq!(*b, "hello");
-    }
-
-    #[test]
-    fn test_mut_borrow() {
-        let mut a = String::from("hello");
-        // 借用时需要借用 &mut a (可变引用)，才可改变值
-        change(&mut a);
-        assert_eq!(a, "hello, world");
-    }
-
     fn change(some_string: &mut String){
         // 函数没有返回值，那么返回一个 ()
         some_string.push_str(", world")
     }
+
+    #[test]
+    fn test_array() {
+        // 数组存在栈中，一旦创建后大小不能改变
+        let a = [3; 5]; // 数组长度为 5，每个元素都是 3。
+        println!("{:#?}", a);
+        // 数组切片,切片是对数组或 Vector 等底层数据结构的引用，它并不拥有数据，而是引用数据的一部分
+        let slice: &[i32] = &a[1..3]; // 这里表示从索引 1 开始，到索引 3 结束的切片
+        println!("{:#?}", slice);
+        // 使用标准库 std 中 array 模块提供的 from_fn 函数来初始化数组
+        // from_fn 接收一个闭包作为参数，这个闭包会为数组的每个索引生成相应的值。
+        // _i: 闭包参数 _i 表示数组的索引，这里使用了下划线 _ 前缀表示我们虽然接收了这个参数，但在闭包内并未使用它
+        let array: [String; 8] = std::array::from_fn(|_i| String::from("rust is good!"));
+        println!("{:#?}", array);
+    }
+
+    
 
     #[test]
     fn test_lifecycle() {
