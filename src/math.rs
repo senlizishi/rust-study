@@ -9,9 +9,3 @@ pub mod arithmetic {
         a - b
     }
 }
-
-pub mod geometry {
-    pub fn area_of_square(side: f64) -> f64 {
-        side.powi(2)
-    }
-}
