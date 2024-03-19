@@ -99,22 +99,22 @@ mod type_tests {
 
     /**
      * 动态数组 vector
+     * 数组适合于固定长度的场景，而 Vector 则适合于动态长度及存储数据量大的场景，如果容量不足就会触发 vector 扩容
      */
     #[test]
     fn test_vector() {
-        // 数组适合于固定长度的场景，而 Vector 则适合于动态长度及存储数据量大的场景，如果容量不足就会触发 vector 扩容
-        let v: Vec<i32> = Vec::new();
-        v.push(1);
-        println!("{:#?}", v);
-
         // 使用 vec![] 宏创建时可以有初始化值
-        let mut v1 = vec![1, 2, 3];
+        let v = vec![1, 2, 3];
+        println!("{:#?}", v);
         let third: &i32 = &v[2];
         println!("第三个元素是 {}", third);
 
+        let mut v1: Vec<i32> = Vec::new();
+        v1.push(1);
+
         // 基于模式匹配取值
-        match v.get(2) {
-            Some(third) => println!("第三个元素是 {third}"),
+        match v1.get(0) {
+            Some(one) => println!("第一个元素是 {one}"),
             None => println!("not find！"),
         }
     }
