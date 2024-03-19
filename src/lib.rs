@@ -114,12 +114,12 @@ mod type_tests {
 
         // 基于模式匹配取值
         match v1.get(0) {
+            // Option<T> 被包含在标准库中，因此不需要将其显式引入作用域。它的成员 Some 和 None 也是如此，无需使用 Option:: 前缀就可直接使用 Some 和 None
+            // Option 目的是不再担心会错误的使用一个 null，为了拥有一个可能为空的值，你必须要显式的将其放入对应类型的 Option<T> 中。接着，当使用这个值时，必须明确的处理值为空的情况。
             Some(one) => println!("第一个元素是 {one}"),
             None => println!("not find！"),
         }
     }
-
-    // 枚举
 
     /**
      * 结构体和特征
@@ -145,6 +145,21 @@ mod type_tests {
         fn summarize(&self) -> String {
             format!("作者是{}", self.author)
         }
+    }
+
+    /**
+     * 枚举
+     */
+    #[test]
+    fn test_enum() {
+        let m1 = Message::Quit;
+        let m2 = Message::Move{x:1,y:1};
+        println!("{:?}",m1);
+    }
+    #[derive(Debug)]
+    enum Message {
+        Quit,
+        Move { x: i32, y: i32 },
     }
 }
 
