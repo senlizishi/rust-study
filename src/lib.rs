@@ -28,7 +28,7 @@ impl Config {
     }
 }
 
-// Box<dyn Error> 特征对象，它表示函数返回一个类型，该类型实现了 Error 特征，这样我们就无需指定具体的错误类型
+// Box<dyn Error> 特质对象，它表示函数返回一个类型，该类型实现了 Error 特质，这样我们就无需指定具体的错误类型
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     // 如果结果是 Ok(T)，则把 T 赋值给 f，如果结果是 Err(E)，则返回该错误，所以 ? 特别适合用来传播错误
     let contents = fs::read_to_string(config.file_path)?;
@@ -123,7 +123,7 @@ mod type_tests {
 
     /**
      * HashMap
-     * 可否作为 key 需要该类型实现 Hash 和 Eq 特征。
+     * 可否作为 key 需要该类型实现 Hash 和 Eq 特质。
      * 哈希函数的作用在于把所有 key 映射到唯一的哈希值，方便快速查找。高安全性的哈希函数能够避免哈希碰撞，但是可能会损失一定的性能。
      */
     #[test]
@@ -156,7 +156,7 @@ mod type_tests {
         let char_list = vec!['y', 'm', 'a', 'q'];
         print_list(&char_list)
     }
-    // 给 T 泛型实现 Display 特征，使其能够打印
+    // 给 T 泛型实现 Display 特质，使其能够打印
     fn print_list<T: std::fmt::Display>(list: &[T]) {
         for i in list {
             println!("{i}");
@@ -164,29 +164,57 @@ mod type_tests {
     }
 
     /**
-     * 结构体与特征
+     * 结构体（包含特质与泛型)
      */
     #[test]
     fn test_struct_and_trait() {
+        // 这一步称为创建结构体实例，简称为实例
         let post = Post {
             author: "Sunface".to_string(),
         };
         println!("整体信息打印：{:?}", post); // 使用 #[derive(Debug)] 对结构体进行了标记，这样才能使用 println!("{:?}", s); 的方式对其进行打印输出
         println!("{}", post.summarize());
     }
+    // 特质定义
     pub trait Summary {
         fn summarize(&self) -> String;
+
+        // 特质也可以有默认实现
+        fn summarize2(&self) -> String {
+            String::from("(Read more...)")
+        }
     }
-    // 结构属性和方法定义是分离的
-    #[derive(Debug)]
+    pub trait Display {}
+    #[derive(Debug)] // 特征派生语法，被标记的结构体会自动实现特质代码。总之，derive 派生出来的是 Rust 默认给我们提供的特征，在开发过程中极大的简化了自己手动实现相应特征的需求
+     // 结构体定义
     pub struct Post {
         pub author: String,
     }
-    // 实现特征
+     // 结构体定于与方法定义是分离的
     impl Summary for Post {
         fn summarize(&self) -> String {
             format!("作者是{}", self.author)
         }
+    }
+
+    /**
+     * 特质约束--入参必须具有约束中的特质
+     */
+    // 特质约束（语法糖写法）,这种语法糖写法无法保证多个参数类型相同，只能保证他们实现的特质相同
+    pub fn sugar(item: &(impl Summary + Display)) {
+        println!("Breaking news! {}", item.summarize());
+    }
+    // 这种写法保证入参类型相同
+    pub fn real<T: Summary + Display>(item: &T, item2: &T) {
+        println!("{}", item.summarize());
+    }
+    // where 写法，当特质约束太复杂时可以使用 where 写法
+    pub fn real_where<T, U>(item: &T, item2: &U)
+    where
+        T: Summary + Display,
+        U: Summary + Display,
+    {
+        println!("{}", item.summarize());
     }
 
     /**
@@ -270,6 +298,6 @@ mod ohter_tests {
         println!("a = {}", a);
         // 需要手动解引用
         let b = *a + 1;
-        // a 持有的智能指针将在作用域结束（main 函数结束）时，被释放掉，这是因为 Box<T> 实现了 Drop 特征
+        // a 持有的智能指针将在作用域结束（main 函数结束）时，被释放掉，这是因为 Box<T> 实现了 Drop 特质
     }
 }
