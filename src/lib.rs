@@ -146,7 +146,25 @@ mod type_tests {
     }
 
     /**
-     * 结构体和特征
+     * 泛型
+     * Rust 通过在编译时进行泛型代码的 单态化(monomorphization)来保证效率。单态化是一个通过填充编译时使用的具体类型，将通用代码转换为特定代码的过程。类似于 Java 中泛型擦除
+     */
+    #[test]
+    fn test_generics() {
+        let number_list = vec![34, 50, 25, 100, 65];
+        print_list(&number_list);
+        let char_list = vec!['y', 'm', 'a', 'q'];
+        print_list(&char_list)
+    }
+    // 给 T 泛型实现 Display 特征，使其能够打印
+    fn print_list<T: std::fmt::Display>(list: &[T]) {
+        for i in list {
+            println!("{i}");
+        }
+    }
+
+    /**
+     * 结构体与特征
      */
     #[test]
     fn test_struct_and_trait() {
