@@ -122,6 +122,30 @@ mod type_tests {
     }
 
     /**
+     * HashMap
+     * 可否作为 key 需要该类型实现 Hash 和 Eq 特征。
+     * 哈希函数的作用在于把所有 key 映射到唯一的哈希值，方便快速查找。高安全性的哈希函数能够避免哈希碰撞，但是可能会损失一定的性能。
+     */
+    #[test]
+    fn test_hashmap() {
+        // 需要手动引入
+        use std::collections::HashMap;
+
+        let mut scores = HashMap::new();
+        scores.insert(String::from("Blue"), 10);
+        scores.insert(String::from("Yellow"), 50);
+
+        let team_name = String::from("Blue");
+        match scores.get(&team_name) {
+            Some(target) => println!("值是 {target}"), // 注意这里是取引用
+            None => println!("not find！"),
+        }
+        // 直接取值写法
+        let score: i32 = scores.get(&team_name).copied().unwrap_or(0);
+        println!("值是 {score}")
+    }
+
+    /**
      * 结构体和特征
      */
     #[test]
@@ -153,8 +177,8 @@ mod type_tests {
     #[test]
     fn test_enum() {
         let m1 = Message::Quit;
-        let m2 = Message::Move{x:1,y:1};
-        println!("{:?}",m1);
+        let m2 = Message::Move { x: 1, y: 1 };
+        println!("{:?}", m1);
     }
     #[derive(Debug)]
     enum Message {
