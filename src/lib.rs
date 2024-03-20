@@ -164,17 +164,11 @@ mod type_tests {
     }
 
     /**
-     * 结构体（包含特质与泛型)
+     * 结构体
+     * 在 Rust 中 struct 和 impl 是分开的，允许同一个数据类型有不同的行为表现，也使得结构体更容易复用
+     * struct：定义了数据结构
+     * impl： 则是针对某个具体结构体或枚举定义其行为。还可以实现 traits（特质）
      */
-    #[test]
-    fn test_struct_and_trait() {
-        // 这一步称为创建结构体实例，简称为实例
-        let post = Post {
-            author: "Sunface".to_string(),
-        };
-        println!("整体信息打印：{:?}", post); // 使用 #[derive(Debug)] 对结构体进行了标记，这样才能使用 println!("{:?}", s); 的方式对其进行打印输出
-        println!("{}", post.summarize());
-    }
     // 特质定义
     pub trait Summary {
         fn summarize(&self) -> String;
@@ -185,18 +179,25 @@ mod type_tests {
         }
     }
     pub trait Display {}
-    #[derive(Debug)] // 特征派生语法，被标记的结构体会自动实现特质代码。总之，derive 派生出来的是 Rust 默认给我们提供的特征，在开发过程中极大的简化了自己手动实现相应特征的需求
-     // 结构体定义
-    pub struct Post {
-        pub author: String,
-    }
-     // 结构体定于与方法定义是分离的
+     #[derive(Debug)] // 特征派生语法，被标记的结构体会自动实现特质代码。总之，derive 派生出来的是 Rust 默认给我们提供的特征，在开发过程中极大的简化了自己手动实现相应特征的需求
+     pub struct Post {
+         pub author: String,
+     }
     impl Summary for Post {
         fn summarize(&self) -> String {
             format!("作者是{}", self.author)
         }
     }
-
+    #[test]
+    fn test_struct() {
+        // 创建实例
+        let post = Post {
+            author: "Sunface".to_string(),
+        };
+        println!("整体信息打印：{:?}", post);
+        println!("{}", post.summarize());
+    }
+    
     /**
      * 特质约束--入参必须具有约束中的特质
      */
