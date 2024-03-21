@@ -199,7 +199,7 @@ mod type_tests {
     }
     
     /**
-     * 特质约束--入参必须具有约束中的特质
+     * 特质约束 + 泛型限制入参
      */
     // 特质约束（语法糖写法）,这种语法糖写法无法保证多个参数类型相同，只能保证他们实现的特质相同
     pub fn sugar(item: &(impl Summary + Display)) {
@@ -219,7 +219,9 @@ mod type_tests {
     }
 
     /**
-     * 特质对象
+     * 特征对象（trait objects）是一种动态分发的机制，用于在不知道具体类型的情况下，通过特征来引用和操作对象。特征对象由两部分组成：一个指向某个实际对象的指针，和一个指向该对象实现的特征方法的表的指针。
+     * let obj:  (&dyn Trait | Box<dyn Trait>) = ...  来表示特质对象。这个特征对象并不包含实际的对象数据，可以将其视为一个指向实现了特定特征的对象的“动态”引用
+     * 使用场景：当你有一个包含不同类型对象的集合，并且你想通过相同的接口来操作这些对象
      */
     trait Animal {
         fn speak(&self);
@@ -245,10 +247,7 @@ mod type_tests {
     fn test_trait() {
         let cat = Cat;
         let dog = Dog;
-        // 目的：将不同 St但实现同一特质的对象放入同一个集合中，这样就可以用同一套接口操作这些对象
-        // 编译时类型的大小是已知的这被称为 Sized 类型，而 dyn Animal 是一种动态派发的类型，它代表了所有实现了 Animal 特质的具体类型则为动态类型，其大小是未知的，属于 Unsized 类型。
-        // Box<T> 是一个智能指针，它将所包含的对象存储在堆上，因此可以容纳 Unsized 类型。当我们将 Animal 实现类型装箱（boxed）成 Box<dyn Animal> 后，就变成了一个 Sized 类型，可以放入 Vec 中
-        // 注意：使用了 Box 智能指针，当 cat 和 dog 被装箱（boxed）到 Vec<Box<dyn Animal>> 中时，会发生所有权转移
+        // 使用 Box::new(T) 的方式来创建了两个 Box<dyn Draw> 特征对象
         let animals: Vec<Box<dyn Animal>> = vec![Box::new(cat), Box::new(dog)];
         make_animals_speak(animals);
     }
@@ -325,6 +324,8 @@ mod ohter_tests {
 
     /**
      * 智能指针
+     * 
+     * 在 Rust 中，编译器期望在编译时知道大部分类型的大小（Sized），以便计算内存布局和进行静态内存分配。然而，有些类型，如 trait 对象 dyn Trait，是无大小类型（Unsized），它们的大小在编译时无法确定。”对于无大小类型，它们不能直接存储在栈上或作为结构体的成员，但可以通过智能指针（如 Box<T>、Rc<T>、Arc<T> 等）间接持有，这些智能指针是有固定大小的，因为它们内部存储的是指向堆上数据的指针和必要的元数据
      */
     #[test]
     fn test_smart_pointer() {
