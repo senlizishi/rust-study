@@ -219,6 +219,41 @@ mod type_tests {
     }
 
     /**
+     * 特质对象
+     */
+    trait Animal {
+        fn speak(&self);
+    }
+    struct Cat;
+    impl Animal for Cat {
+        fn speak(&self) {
+            println!("Meow!");
+        }
+    }
+    struct Dog;
+    impl Animal for Dog {
+        fn speak(&self) {
+            println!("Woof!");
+        }
+    }
+    fn make_animals_speak(animals: Vec<Box<dyn Animal>>) {
+        for animal in animals.iter() {
+            animal.speak();
+        }
+    }
+    #[test]
+    fn test_trait() {
+        let cat = Cat;
+        let dog = Dog;
+        // 目的：将不同 St但实现同一特质的对象放入同一个集合中，这样就可以用同一套接口操作这些对象
+        // 编译时类型的大小是已知的这被称为 Sized 类型，而 dyn Animal 是一种动态派发的类型，它代表了所有实现了 Animal 特质的具体类型则为动态类型，其大小是未知的，属于 Unsized 类型。
+        // Box<T> 是一个智能指针，它将所包含的对象存储在堆上，因此可以容纳 Unsized 类型。当我们将 Animal 实现类型装箱（boxed）成 Box<dyn Animal> 后，就变成了一个 Sized 类型，可以放入 Vec 中
+        // 注意：使用了 Box 智能指针，当 cat 和 dog 被装箱（boxed）到 Vec<Box<dyn Animal>> 中时，会发生所有权转移
+        let animals: Vec<Box<dyn Animal>> = vec![Box::new(cat), Box::new(dog)];
+        make_animals_speak(animals);
+    }
+
+    /**
      * 枚举
      */
     #[test]
