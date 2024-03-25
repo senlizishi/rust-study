@@ -179,10 +179,10 @@ mod type_tests {
         }
     }
     pub trait Display {}
-     #[derive(Debug)] // 特征派生语法，被标记的结构体会自动实现特质代码。总之，derive 派生出来的是 Rust 默认给我们提供的特征，在开发过程中极大的简化了自己手动实现相应特征的需求
-     pub struct Post {
-         pub author: String,
-     }
+    #[derive(Debug)] // 特征派生语法，被标记的结构体会自动实现特质代码。总之，derive 派生出来的是 Rust 默认给我们提供的特征，在开发过程中极大的简化了自己手动实现相应特征的需求
+    pub struct Post {
+        pub author: String,
+    }
     impl Summary for Post {
         fn summarize(&self) -> String {
             format!("作者是{}", self.author)
@@ -197,7 +197,7 @@ mod type_tests {
         println!("整体信息打印：{:?}", post);
         println!("{}", post.summarize());
     }
-    
+
     /**
      * 特质约束 + 泛型限制入参
      */
@@ -249,7 +249,7 @@ mod type_tests {
     fn test_trait() {
         let cat = Cat;
         let dog = Dog;
-        // Rust 需要在编译时知道类型占用多少空间，如果一种类型在编译时无法知道具体的大小，那么被称为动态大小类型 
+        // Rust 需要在编译时知道类型占用多少空间，如果一种类型在编译时无法知道具体的大小，那么被称为动态大小类型
         // 使用 Box::new(T) 的方式来创建了两个 Box<dyn Draw> 特征对象（隐式转换），特质对象在做的就是将 DST 类型转换为固定大小类型
         let animals: Vec<Box<dyn Animal>> = vec![Box::new(cat), Box::new(dog)];
         make_animals_speak(animals);
@@ -268,6 +268,33 @@ mod type_tests {
     enum Message {
         Quit,
         Move { x: i32, y: i32 },
+    }
+}
+
+#[cfg(test)]
+mod mul_thread_tests {
+
+
+    /**
+     * Java中的线程分为守护线程和非守护线程
+     * - 守护线程：程序运行时在后台提供服务的线程，如 GC 线程，当所有非守护线程结束时，Java虚拟机会自动退出，不会等待守护线程执行完毕
+     * - 非守护线程（用户线程）：在程序运行过程中执行实际任务的线程，只有在Java中确保所有非守护线程都已经执行完毕，Java虚拟机就会退出。因此当用户线程 main 创建子线程 A，在 main 结束后 A 仍然会运行。
+     * 
+     * Rust 一旦主线程（main）完成，整个程序将结束，不论子线程是否还有未完成的工作都会结束。而当在 main 线程中创建 A 线程，A线程创建 B线程，在 main 线程没结束的前提下，A线程结束不影响 B线程运行，直到 main 线程结束才会停止
+     */
+    #[test]
+    fn test_create() {
+        use std::thread;
+        use std::time::Duration;
+        let handle = thread::spawn(|| {
+            for i in 1..5 {
+                println!("子线程在运行!");
+                thread::sleep(Duration::from_millis(2000));
+            }
+        });
+        // 让主线程安全、可靠地等所有子线程完成任务后，再 kill self
+        handle.join().unwrap();
+        println!("主线程运行完毕!");
     }
 }
 
@@ -327,11 +354,11 @@ mod ohter_tests {
 
     /**
      * 智能指针
-     * 
+     *
      * 与引用的区别：
      * - 智能指针比引用更复杂的数据结构，包含比引用更多的信息，例如元数据，当前长度，最大可用长度等
      * - 引用和智能指针的另一个不同在于前者仅仅是借用了数据，而后者往往可以拥有它们指向的数据
-     * 
+     *
      * 智能指针往往是基于结构体实现，它与我们自定义的结构体最大的区别在于它实现了 Deref 和 Drop 特征，这也是智能之处
      * - Deref：可以让智能指针像引用那样工作，这样你就可以写出同时支持智能指针和引用的代码（常见于隐式转换、引用归一化）
      * - Drop：允许你指定智能指针超出作用域后自动执行的代码，例如做一些数据清除等收尾工作
@@ -352,13 +379,13 @@ mod ohter_tests {
         // 这里之所以使用 Self ，是因为 Draw 是一个 trait 可以被多个类型实现，Self 则代表其具体的类型
         fn draw(&self) -> Self;
     }
-    
+
     #[derive(Clone)]
     struct Button;
     impl Draw for Button {
         // self指代的就是当前的实例对象，Self 指的是当前的类型（Button）
         fn draw(&self) -> Self {
-            return self.clone()
+            return self.clone();
         }
     }
 }
