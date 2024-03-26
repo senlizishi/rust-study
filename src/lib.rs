@@ -287,7 +287,7 @@ mod mul_thread_tests {
         use std::thread;
         use std::time::Duration;
         let handle = thread::spawn(|| {
-            for i in 1..5 {
+            for _ in 1..5 {
                 println!("子线程在运行!");
                 thread::sleep(Duration::from_millis(2000));
             }
@@ -295,6 +295,49 @@ mod mul_thread_tests {
         // 让主线程安全、可靠地等所有子线程完成任务后，再 kill self
         handle.join().unwrap();
         println!("主线程运行完毕!");
+    }
+
+    /**
+     * Java 和 Rust 在多线程编程方面采取了不同的策略和技术来保障线程安全和有效并发
+     *
+     * Java
+     * - Synchronized Blocks 和 Lock：在多线程环境下确保对共享内存的访问是有序和线程安全的
+     * - BlockingQueue：线程间通信
+     * - 并发工具类：volatile 关键字确保变量的可见性和有序性、原子类（AtomicInteger）、并发集合类（ConcurrentHashMap）
+     * - ExecutorService：线程池
+     * - 异步编程：Runnable 和 Callable、ExecutorService(线程池)、Future 和 CompletableFuture （后面）
+     *
+     *
+     * Rust
+     * - Mutex（互斥锁） 和 RwLock（读写锁）
+     * - 通道（Channel）：实现线程间通信 （发送者 -> 通道 -> 接收者）
+     * - Arc：原子引用计数智能指针，使得多个线程可以安全地共享所有权和数据，而无需担心数据竞争和生命周期问题
+     */
+    #[test]
+    fn test_send_message() {
+        use std::sync::mpsc;
+        use std::thread;
+        use std::time::Duration;
+        // 通道分为同步和异步
+        let (tx, rx) = mpsc::channel();
+
+        thread::spawn(move || {
+            let vals = vec![
+                String::from("hi"),
+                String::from("from"),
+                String::from("the"),
+                String::from("thread"),
+            ];
+
+            for val in vals {
+                tx.send(val).unwrap();
+                thread::sleep(Duration::from_secs(1));
+            }
+        });
+
+        for received in rx {
+            println!("Got: {}", received);
+        }
     }
 }
 
@@ -327,7 +370,7 @@ mod smart_pointers {
      * 通过引用计数的方式（通过记录一个数据被引用的次数来确定该数据是否正在被使用。当引用次数归零时，就代表该数据不再被使用，因此可以被清理释放），允许一个数据资源在同一时刻拥有多个所有者
      * - RC 适用于单线程
      * - Arc 适用于多线程
-     * 
+     *
      * 注意：
      * - Rc/Arc 是不可变引用，你无法修改它指向的值，如果要修改，需要配合后面章节的内部可变性 RefCell 或互斥锁 Mutex
      * - 一旦最后一个拥有者消失，则资源会自动被回收，这个生命周期是在编译期就确定下来的
