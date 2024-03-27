@@ -301,17 +301,20 @@ mod mul_thread_tests {
      * Java 和 Rust 在多线程编程方面采取了不同的策略和技术来保障线程安全和有效并发
      *
      * Java
-     * - Synchronized Blocks 和 Lock：在多线程环境下确保对共享内存的访问是有序和线程安全的（同步性）
-     * - BlockingQueue：线程间通信
-     * - 并发工具类：volatile 关键字确保变量的可见性和有序性、原子类（AtomicInteger）、并发集合类（ConcurrentHashMap）
+     * - 消息传递同步：BlockingQueue：线程间通信
+     * - 锁同步：Synchronized Blocks 和 Lock + wait()、notify()、notifyAll()
+     * - 信号量：Semaphore 限制运行最大线程数
+     * - 原子类（AtomicInteger）
+     * - 并发集合类（ConcurrentHashMap）
+     * - volatile 关键字确保变量的可见性和有序性、
      * - ExecutorService：线程池
      * - 异步编程：Runnable 和 Callable、ExecutorService(线程池)、Future 和 CompletableFuture （后面）
      *
-     *
      * Rust
-     * - Mutex（互斥锁） 和 RwLock（读写锁）
-     * - 通道（Channel）：实现线程间通信 （发送者 -> 通道 -> 接收者）
-     * - Arc：原子引用计数智能指针，使得多个线程可以安全地共享所有权和数据，而无需担心数据竞争和生命周期问题
+     * - 消息传递同步：实现线程间通信，发送者 -> 通道（Channel） -> 接收者
+     * - 锁同步：Mutex（互斥锁） 和 RwLock（读写锁） + Condvar，wait 暂时释放当前锁，使其他线程获取锁，同时当前线程会阻塞，直到被唤醒 notify
+     * - 信号量：Semaphore 限制运行最大线程数
+     * - 原子类（AtomicInteger）
      */
     #[test]
     fn test_channel() {
@@ -367,8 +370,35 @@ mod mul_thread_tests {
             // 等待所有子线程的结束
             handle.join().unwrap();
         }
-
         println!("Result: {}", *counter.lock().unwrap());
+    }
+
+    /**
+     * 读写锁，同一时间允许多个读，但同一时间只允许一个写，且注意读写互斥
+     */
+    #[test]
+    fn test_rwlock() {
+        use std::sync::RwLock;
+        let lock = RwLock::new(5);
+
+        {
+            // 同一时间允许多个读
+            let r1 = lock.read().unwrap();
+            let r2 = lock.read().unwrap();
+            assert_eq!(*r1, 5);
+            assert_eq!(*r2, 5);
+        } // 读锁在此处被drop
+
+        {
+            let mut w = lock.write().unwrap();
+            *w += 1;
+            assert_eq!(*w, 6);
+
+            // 以下代码会阻塞发生死锁，因为读和写不允许同时存在（互斥）
+            // 写锁w直到该语句块结束才被释放，因此下面的读锁依然处于`w`的作用域中
+            // let r1 = lock.read();
+            // println!("{:?}",r1);
+        } // 写锁在此处被drop
     }
 }
 
@@ -403,7 +433,7 @@ mod smart_pointers {
      * - Arc 适用于多线程
      *
      * 注意：
-     * - Rc/Arc 是不可变引用，你无法修改它指向的值，如果要修改，需要配合后面章节的内部可变性 RefCell 或互斥锁 Mutex
+     * - Rc/Arc 是不可变引用，你无法修改它指向的值，如果要修改，Rc<T>和RefCell<T>的结合，可以实现单线程的内部可变性，Mutex<T> + Arc<T> 可以实现多线程的内部可变性
      * - 一旦最后一个拥有者消失，则资源会自动被回收，这个生命周期是在编译期就确定下来的
      */
     #[test]
