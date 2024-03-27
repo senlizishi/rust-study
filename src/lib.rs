@@ -301,7 +301,7 @@ mod mul_thread_tests {
      * Java 和 Rust 在多线程编程方面采取了不同的策略和技术来保障线程安全和有效并发
      *
      * Java
-     * - Synchronized Blocks 和 Lock：在多线程环境下确保对共享内存的访问是有序和线程安全的
+     * - Synchronized Blocks 和 Lock：在多线程环境下确保对共享内存的访问是有序和线程安全的（同步性）
      * - BlockingQueue：线程间通信
      * - 并发工具类：volatile 关键字确保变量的可见性和有序性、原子类（AtomicInteger）、并发集合类（ConcurrentHashMap）
      * - ExecutorService：线程池
@@ -314,7 +314,7 @@ mod mul_thread_tests {
      * - Arc：原子引用计数智能指针，使得多个线程可以安全地共享所有权和数据，而无需担心数据竞争和生命周期问题
      */
     #[test]
-    fn test_send_message() {
+    fn test_channel() {
         use std::sync::mpsc;
         use std::thread;
         use std::time::Duration;
@@ -338,6 +338,37 @@ mod mul_thread_tests {
         for received in rx {
             println!("Got: {}", received);
         }
+    }
+
+    /**
+     * 互斥锁 Mutex,同一时间，只允许一个线程访问该值，其它线程需要等待A访问完成后才能继续
+     */
+    #[test]
+    fn test_mutex() {
+        use std::sync::{Arc, Mutex};
+        use std::thread;
+        // 使用 Arc 智能指针允许锁资源在同一时刻拥有多个所有者
+        let counter = Arc::new(Mutex::new(0));
+        let mut handles = vec![];
+
+        for _ in 0..10 {
+            let counter = Arc::clone(&counter);
+            let handle = thread::spawn(move || {
+                // m.lock() 获取锁，获取不到则处于阻塞状态，返回结果为 Result 通过 unwrap 简化值获取，Mutex<T> 是一个智能指针
+                let mut num = counter.lock().unwrap();
+
+                *num += 1;
+                // 作用域结束，锁被释放
+            });
+            handles.push(handle);
+        }
+
+        for handle in handles {
+            // 等待所有子线程的结束
+            handle.join().unwrap();
+        }
+
+        println!("Result: {}", *counter.lock().unwrap());
     }
 }
 
